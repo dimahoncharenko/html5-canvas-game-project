@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./build/style.css" />
+
+    <title>HTML5 Canvas</title>
+  </head>
+  <body>
+    <div class="game">
+      <div class="game__score">
+        Score: <span class="game__score-value">0</span>
+      </div>
+      <div class="modal active">
+        <div class="modal__content">
+          <h1 class="modal__score">0</h1>
+          <p class="modal__score__label">scores</p>
+          <button class="start-game">Start Game</button>
+        </div>
+      </div>
+      <canvas id="canvas"></canvas>
+      <!-- For test purposes (you need to uncomment piece of the TS code which handle the click event of the button) -->
+      <button id="stop">Stop spawning!</button>
+    </div>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"
+      integrity="sha512-H6cPm97FAsgIKmlBA4s774vqoN24V5gSQL4yBTDOY2su2DeXZVhQPxFK4P6GPdnZqM9fg1G3cMv5wD7e6cFLZQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script src="/build/index.js"></script>
+  </body>
+</html>

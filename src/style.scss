@@ -1,0 +1,91 @@
+:root {
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  background-color: black;
+}
+
+.game {
+  display: grid;
+
+  > * {
+    grid-area: 1/-1;
+  }
+
+  > .game__score,
+  > #stop {
+    user-select: none;
+    padding: 0.3em;
+    color: white;
+    z-index: 1;
+  }
+
+  > #stop {
+    background-color: transparent;
+    border: 0.1em solid white;
+    justify-self: center;
+    border-radius: 0.5em;
+    margin-bottom: 1em;
+    cursor: pointer;
+    align-self: end;
+  }
+
+  > .modal {
+    display: none;
+    z-index: 3;
+
+    &.active {
+      display: flex;
+    }
+
+    > .modal__content {
+      max-width: 300px;
+      width: 100%;
+      text-align: center;
+      padding: 1em;
+      margin: auto;
+      background-color: rgba(255, 255, 255, 0.95);
+      border-radius: 0.5em;
+
+      > .modal__score,
+      > .modal__score__label {
+        margin: 0;
+        font-weight: bold;
+      }
+
+      > .modal__score {
+        font-size: 2.5rem;
+      }
+
+      > .modal__score__label {
+        line-height: 0.2em;
+        color: rgb(107, 107, 107);
+      }
+
+      > .start-game {
+        background-color: hsl(220, 80%, 70%);
+        border: 0;
+        border-radius: 0.5em;
+        padding: 0.2em 0.5em;
+        color: aliceblue;
+        margin-top: 1em;
+        font-size: 1.5rem;
+        width: 100%;
+        cursor: pointer;
+        transition: background-color 0.2s linear;
+
+        &:hover {
+          background-color: hsl(220, 80%, 65%);
+        }
+      }
+    }
+  }
+}

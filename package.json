@@ -1,0 +1,17 @@
+{
+  "name": "htm5-canvas-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npx tsc --watch",
+    "build:css": "npx node-sass -i ./src/ -o ./build --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "node-sass": "^7.0.1",
+    "typescript": "^4.5.4"
+  }
+}
