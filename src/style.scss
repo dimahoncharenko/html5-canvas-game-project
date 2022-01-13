@@ -15,77 +15,65 @@ body {
 
 .game {
   display: grid;
+  padding: 1em;
 
   > * {
     grid-area: 1/-1;
-  }
-
-  > .game__score,
-  > #stop {
-    user-select: none;
-    padding: 0.3em;
-    color: white;
-    z-index: 1;
-  }
-
-  > #stop {
-    background-color: transparent;
-    border: 0.1em solid white;
-    justify-self: center;
-    border-radius: 0.5em;
-    margin-bottom: 1em;
-    cursor: pointer;
-    align-self: end;
+    max-width: 100%;
+    max-height: 100%;
   }
 
   > .modal {
     display: none;
-    z-index: 3;
+    z-index: 2;
+    color: white;
+    font-weight: bold;
 
     &.active {
       display: flex;
     }
 
     > .modal__content {
-      max-width: 300px;
-      width: 100%;
+      margin: auto;
       text-align: center;
       padding: 1em;
-      margin: auto;
-      background-color: rgba(255, 255, 255, 0.95);
+      color: black;
+      background-color: rgba(255, 255, 255, 0.9);
+      max-width: 300px;
+      width: 100%;
       border-radius: 0.5em;
 
-      > .modal__score,
-      > .modal__score__label {
+      > * {
         margin: 0;
-        font-weight: bold;
-      }
-
-      > .modal__score {
-        font-size: 2.5rem;
       }
 
       > .modal__score__label {
+        color: lightslategrey;
+        font-size: 0.8rem;
         line-height: 0.2em;
-        color: rgb(107, 107, 107);
       }
 
       > .start-game {
-        background-color: hsl(220, 80%, 70%);
+        margin-top: 1.5em;
         border: 0;
         border-radius: 0.5em;
-        padding: 0.2em 0.5em;
-        color: aliceblue;
-        margin-top: 1em;
-        font-size: 1.5rem;
-        width: 100%;
+        background-color: hsl(210, 50%, 50%);
         cursor: pointer;
-        transition: background-color 0.2s linear;
+        color: white;
+        padding: 0.5em;
+        width: 100%;
+        transition: background-color 0.3s linear;
 
         &:hover {
-          background-color: hsl(220, 80%, 65%);
+          background-color: hsl(210, 50%, 45%);
         }
       }
     }
+  }
+
+  > .game__score {
+    z-index: 1;
+    user-select: none;
+    color: white;
   }
 }
