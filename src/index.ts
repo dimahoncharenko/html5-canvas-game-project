@@ -221,6 +221,23 @@ class Enemy extends Actor {
   }
 }
 
+// For making sound effects
+class FX {
+  private streams: HTMLAudioElement[] = [];
+  private currentStreamIndex = 1;
+  constructor(src: string, vol = 0.5, private streamLimit = 1) {
+    for (let i = 0; i < this.streamLimit; i++) {
+      this.streams.push(new Audio(src));
+      this.streams[i].volume = vol;
+    }
+  }
+
+  play() {
+    this.currentStreamIndex = (this.currentStreamIndex + 1) % this.streamLimit;
+    this.streams[this.currentStreamIndex].play();
+  }
+}
+
 addEventListener("DOMContentLoaded", () => {
   const canvas = document.querySelector<HTMLCanvasElement>("#canvas");
   const modal = document.querySelector<HTMLDivElement>(".modal");
@@ -249,6 +266,9 @@ addEventListener("DOMContentLoaded", () => {
     let spawnTime = ENEMY_SPAWN_TIME;
     let particles: Particle[] = [];
     let score = 0;
+    // set up sound effects
+    let laserFX = new FX("/build/8-bit-lazer.wav", 0.5, 6);
+    let explosionFX = new FX("/build/8-bit-explosion.wav", 0.3, 6);
 
     // handle creation of enemies
     function createEnemy() {
@@ -294,7 +314,6 @@ addEventListener("DOMContentLoaded", () => {
     // set up the game loop
     function animate() {
       const frameId = requestAnimationFrame(animate);
-
       // clear the scene
       ctx!.fillStyle = "rgba(0, 0, 0, .2)";
       ctx!.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -359,6 +378,9 @@ addEventListener("DOMContentLoaded", () => {
               enemies.splice(i, 1);
             }
 
+            // play explosion sound
+            explosionFX.play();
+
             // display new score
             gameScore!.innerHTML = `${score}`;
 
@@ -389,8 +411,6 @@ addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      console.log(particles);
-
       // draw particles
       for (let i = particles.length - 1; i >= 0; i--) {
         if (particles[i].alpha > 0) {
@@ -403,6 +423,7 @@ addEventListener("DOMContentLoaded", () => {
 
     // set up event handlers
     addEventListener("click", ({ clientX, clientY }) => {
+      laserFX.play();
       const angle = Math.atan2(clientY - player.y, clientX - player.x);
       const velocity: Velocity = {
         x: Math.cos(angle) * PROJECTILE_SPD,
