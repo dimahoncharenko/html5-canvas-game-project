@@ -423,7 +423,10 @@ addEventListener("DOMContentLoaded", () => {
 
     // set up event handlers
     addEventListener("click", ({ clientX, clientY }) => {
-      laserFX.play();
+      // When modal window is active the laser sound effects should be muted
+      if (!modal.classList.contains("active")) {
+        laserFX.play();
+      }
       const angle = Math.atan2(clientY - player.y, clientX - player.x);
       const velocity: Velocity = {
         x: Math.cos(angle) * PROJECTILE_SPD,
