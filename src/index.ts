@@ -5,6 +5,7 @@ const PLAYER_SIZE = 30; // Player's size in pixels
 
 const PROJECTILE_SIZE = 8; // Projectiles' size in pixels
 const PROJECTILE_SPD = 5; // Coefficient of projectiles' speed
+const PROJECTILE_LIMIT = 6; // Amount of projectiles at the scene at once
 
 const ENEMY_MAX_SIZE = 35; // Enemies' max size
 const ENEMY_MIN_SIZE = 15; // Enemies' min size
@@ -433,6 +434,7 @@ addEventListener("DOMContentLoaded", () => {
     // set up event handlers
     addEventListener("click", ({ clientX, clientY }) => {
       // When modal window is active the laser sound effects should be muted
+      if (projectiles.length >= PROJECTILE_LIMIT) return;
       if (!modal.classList.contains("active")) {
         laserFX.play();
       }

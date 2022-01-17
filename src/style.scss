@@ -11,8 +11,8 @@
 body {
   margin: 0;
   background-color: black;
+  font-family: "Courier New", Courier, monospace;
 }
-
 .game {
   display: grid;
   padding: 1em;
@@ -60,7 +60,7 @@ body {
 
       > .modal__highscore {
         border-bottom: 0.05em solid gray;
-        padding: 0.3em;
+        padding-bottom: 0.3em;
       }
 
       > .modal__score {
@@ -78,6 +78,8 @@ body {
         border: 0;
         border-radius: 0.5em;
         background-color: hsl(210, 50%, 50%);
+        font-family: "Courier New", Courier, monospace;
+        text-transform: uppercase;
         cursor: pointer;
         color: white;
         padding: 0.5em;
