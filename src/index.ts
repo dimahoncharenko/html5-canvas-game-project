@@ -14,53 +14,179 @@ const PARTICLE_SPD = 0.99; // Coefficient of fading speed of particles (The less
 const PARTICLE_MAX_SIZE = 1.5; // Particles' max size
 const PARTICLE_DISTANCE = 5; // Coefficient of distance that particle can to achieve
 
-class Mass {
-  constructor(
-    public x: number,
-    public y: number,
-    public r: number,
-    public color: string,
-    protected ctx: CanvasRenderingContext2D
-  ) {}
-
-  draw() {
-    this.ctx.fillStyle = this.color;
-    this.ctx.beginPath();
-    this.ctx.arc(this.x, this.y, this.r, Math.PI * 2, 0);
-    this.ctx.fill();
-  }
-}
-
-class MovingMass extends Mass {
-  constructor(
-    x: number,
-    y: number,
-    r: number,
-    color: string,
-    ctx: CanvasRenderingContext2D,
-    protected velocity: Velocity
-  ) {
-    super(x, y, r, color, ctx);
-  }
-
-  update() {
-    this.draw();
-    this.x += this.velocity.x;
-    this.y += this.velocity.y;
-  }
-}
-
-class Player extends Mass {}
-
 type Velocity = {
   x: number;
   y: number;
 };
 
-class Projectile extends MovingMass {}
-class Enemy extends MovingMass {}
-class Particle extends MovingMass {
+interface DrawBegaviour {
+  draw(
+    x: number,
+    y: number,
+    r: number,
+    color: string,
+    ctx: CanvasRenderingContext2D
+  ): void;
+}
+
+interface UpdateBegaviour {
+  update(
+    x: number,
+    y: number,
+    velocity: Velocity
+  ): { x: number; y: number; velocity: Velocity };
+}
+
+class Actor {
+  protected drawBehaviour: DrawBegaviour;
+  protected updateBehaviour: UpdateBegaviour;
+  constructor(
+    public x: number,
+    public y: number,
+    public r: number,
+    public color: string,
+    public velocity: Velocity,
+    protected ctx: CanvasRenderingContext2D
+  ) {}
+
+  draw() {
+    this.drawBehaviour.draw(this.x, this.y, this.r, this.color, this.ctx);
+  }
+
+  update() {
+    this.draw();
+    const { x, y, velocity } = this.updateBehaviour.update(
+      this.x,
+      this.y,
+      this.velocity
+    );
+    this.x = x;
+    this.y = y;
+    this.velocity = velocity;
+  }
+}
+
+class WithoutMove implements UpdateBegaviour {
+  update(x: number, y: number, velocity: Velocity) {
+    return { x, y, velocity };
+  }
+}
+
+class WithMove implements UpdateBegaviour {
+  update(x: number, y: number, velocity: Velocity) {
+    x += velocity.x;
+    y += velocity.y;
+    return {
+      x,
+      y,
+      velocity,
+    };
+  }
+}
+
+class Circle implements DrawBegaviour {
+  draw(
+    x: number,
+    y: number,
+    r: number,
+    color: string,
+    ctx: CanvasRenderingContext2D
+  ) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, r, Math.PI * 2, 0);
+    ctx.fill();
+  }
+}
+
+class Triangle implements DrawBegaviour {
+  draw(
+    x: number,
+    y: number,
+    r: number,
+    color: string,
+    ctx: CanvasRenderingContext2D
+  ): void {
+    const dir = Math.atan2(y - CANVAS_HEIGHT / 2, x - CANVAS_WIDTH / 2);
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(x + r * Math.cos(dir), y - r * Math.sin(dir));
+    ctx.lineTo(
+      x - r * (Math.cos(dir) - Math.sin(dir)),
+      y + r * (Math.sin(dir) + Math.cos(dir))
+    );
+    ctx.lineTo(
+      x - r * (Math.cos(dir) + Math.sin(dir)),
+      y + r * (Math.sin(dir) - Math.cos(dir))
+    );
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
+class Rhombus implements DrawBegaviour {
+  draw(
+    x: number,
+    y: number,
+    r: number,
+    color: string,
+    ctx: CanvasRenderingContext2D
+  ): void {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(x, y + r);
+    ctx.lineTo(x - r, y);
+    ctx.lineTo(x, y - r);
+    ctx.lineTo(x + r, y);
+    ctx.lineTo(x, y + r);
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
+class Player extends Actor {
+  constructor(
+    x: number,
+    y: number,
+    r: number,
+    color: string,
+    ctx: CanvasRenderingContext2D
+  ) {
+    super(x, y, r, color, { x: 0, y: 0 }, ctx);
+    this.updateBehaviour = new WithoutMove();
+    this.drawBehaviour = new Circle();
+  }
+}
+
+class Projectile extends Actor {
+  constructor(
+    x: number,
+    y: number,
+    r: number,
+    color: string,
+    velocity: Velocity,
+    ctx: CanvasRenderingContext2D
+  ) {
+    super(x, y, r, color, velocity, ctx);
+    this.updateBehaviour = new WithMove();
+    this.drawBehaviour = new Circle();
+  }
+}
+
+class Particle extends Actor {
   public alpha = 1.0;
+  constructor(
+    x: number,
+    y: number,
+    r: number,
+    color: string,
+    velocity: Velocity,
+    ctx: CanvasRenderingContext2D
+  ) {
+    super(x, y, r, color, velocity, ctx);
+    this.updateBehaviour = new WithMove();
+    this.drawBehaviour = new Circle();
+  }
 
   draw() {
     this.ctx.save();
@@ -70,10 +196,28 @@ class Particle extends MovingMass {
   }
 
   update() {
-    this.velocity.x *= PARTICLE_SPD;
-    this.velocity.y *= PARTICLE_SPD;
+    this.velocity.x *= 0.99;
+    this.velocity.y *= 0.99;
     super.update();
     this.alpha -= 0.01;
+  }
+}
+
+class Enemy extends Actor {
+  constructor(
+    x: number,
+    y: number,
+    r: number,
+    color: string,
+    velocity: Velocity,
+    ctx: CanvasRenderingContext2D
+  ) {
+    super(x, y, r, color, velocity, ctx);
+    const shapes = [Circle, Rhombus, Triangle];
+    this.drawBehaviour = new shapes[
+      Math.floor(Math.random() * shapes.length)
+    ]();
+    this.updateBehaviour = new WithMove();
   }
 }
 
@@ -128,7 +272,7 @@ addEventListener("DOMContentLoaded", () => {
         y: -Math.sin(angle),
       };
 
-      enemies.push(new Enemy(x, y, r, color, ctx!, vel));
+      enemies.push(new Enemy(x, y, r, color, vel, ctx!));
     }
 
     // handle the game over
@@ -226,7 +370,6 @@ addEventListener("DOMContentLoaded", () => {
                   enemy.y,
                   Math.random() * PARTICLE_MAX_SIZE,
                   enemy.color,
-                  ctx!,
                   {
                     x:
                       (Math.random() - 0.5) *
@@ -234,7 +377,8 @@ addEventListener("DOMContentLoaded", () => {
                     y:
                       (Math.random() - 0.5) *
                       (Math.random() * PARTICLE_DISTANCE),
-                  }
+                  },
+                  ctx!
                 )
               );
             }
@@ -244,6 +388,8 @@ addEventListener("DOMContentLoaded", () => {
           }
         }
       }
+
+      console.log(particles);
 
       // draw particles
       for (let i = particles.length - 1; i >= 0; i--) {
@@ -268,8 +414,8 @@ addEventListener("DOMContentLoaded", () => {
           player.y,
           PROJECTILE_SIZE,
           "salmon",
-          ctx!,
-          velocity
+          velocity,
+          ctx!
         )
       );
     });
