@@ -47,6 +47,26 @@ body {
         margin: 0;
       }
 
+      > .modal__highscore__label {
+        font-size: 2rem;
+        text-transform: uppercase;
+        color: red;
+      }
+
+      > .modal__highscore,
+      > .modal__score {
+        color: rgb(44, 44, 44);
+      }
+
+      > .modal__highscore {
+        border-bottom: 0.05em solid gray;
+        padding: 0.3em;
+      }
+
+      > .modal__score {
+        margin-top: 0.3em;
+      }
+
       > .modal__score__label {
         color: lightslategrey;
         font-size: 0.8rem;

@@ -245,7 +245,11 @@ addEventListener("DOMContentLoaded", () => {
     document.querySelector<HTMLSpanElement>(".game__score-value");
   const modalScore =
     document.querySelector<HTMLHeadingElement>(".modal__score");
+  const modalHighscore =
+    document.querySelector<HTMLHeadingElement>(".modal__highscore");
   const startBtn = document.querySelector<HTMLButtonElement>(".start-game");
+
+  modalHighscore!.innerHTML = localStorage.getItem("highscore") || "No record";
 
   if (canvas && modal) {
     canvas.width = CANVAS_WIDTH;
@@ -297,7 +301,12 @@ addEventListener("DOMContentLoaded", () => {
 
     // handle the game over
     function gameOver(id: number) {
+      const highscore = +(localStorage.getItem("highscore") || 0);
       cancelAnimationFrame(id);
+      if (score > highscore) {
+        localStorage.setItem("highscore", `${score}`);
+      }
+      modalHighscore!.innerHTML = localStorage.getItem("highscore")!;
       modalScore!.innerHTML = `${score}`;
       modal?.classList.add("active");
     }
