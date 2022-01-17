@@ -15,6 +15,8 @@ const PARTICLE_SPD = 0.99; // Coefficient of fading speed of particles (The less
 const PARTICLE_MAX_SIZE = 1.5; // Particles' max size
 const PARTICLE_DISTANCE = 5; // Coefficient of distance that particle can to achieve
 
+const FRICTION = 0.98; // When particles is fading they gradually slow (The smaller value, the faster slow)
+
 type Velocity = {
   x: number;
   y: number;
@@ -111,14 +113,20 @@ class Triangle implements DrawBegaviour {
     const dir = Math.atan2(y - CANVAS_HEIGHT / 2, x - CANVAS_WIDTH / 2);
     ctx.fillStyle = color;
     ctx.beginPath();
-    ctx.moveTo(x + r * Math.cos(dir), y - r * Math.sin(dir));
-    ctx.lineTo(
-      x - r * (Math.cos(dir) - Math.sin(dir)),
-      y + r * (Math.sin(dir) + Math.cos(dir))
+    // Vertice of the triangle
+    ctx.moveTo(
+      x + (4 / 3) * r * Math.cos(dir),
+      y - (4 / 3) * r * Math.sin(dir)
     );
+    // left catet of the triangle
     ctx.lineTo(
-      x - r * (Math.cos(dir) + Math.sin(dir)),
-      y + r * (Math.sin(dir) - Math.cos(dir))
+      x - r * ((2 / 3) * Math.cos(dir) - Math.sin(dir)),
+      y + r * ((2 / 3) * Math.sin(dir) + Math.cos(dir))
+    );
+    // right side of the triangle
+    ctx.lineTo(
+      x - r * ((2 / 3) * Math.cos(dir) + Math.sin(dir)),
+      y + r * ((2 / 3) * Math.sin(dir) - Math.cos(dir))
     );
     ctx.closePath();
     ctx.fill();
@@ -197,8 +205,8 @@ class Particle extends Actor {
   }
 
   update() {
-    this.velocity.x *= 0.99;
-    this.velocity.y *= 0.99;
+    this.velocity.x *= FRICTION;
+    this.velocity.y *= FRICTION;
     super.update();
     this.alpha -= 0.01;
   }
