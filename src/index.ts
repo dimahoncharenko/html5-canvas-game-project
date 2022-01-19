@@ -22,7 +22,13 @@ type Velocity = {
   y: number;
 };
 
-interface DrawBegaviour {
+type UpdateOutput = {
+  x: number;
+  y: number;
+  velocity: Velocity;
+};
+
+interface DrawBehaviour {
   draw(
     x: number,
     y: number,
@@ -32,23 +38,106 @@ interface DrawBegaviour {
   ): void;
 }
 
-interface UpdateBegaviour {
-  update(
+interface UpdateBehaviour {
+  update(x: number, y: number, velocity: Velocity): UpdateOutput;
+}
+
+class Circle implements DrawBehaviour {
+  draw(
     x: number,
     y: number,
-    velocity: Velocity
-  ): { x: number; y: number; velocity: Velocity };
+    r: number,
+    color: string,
+    ctx: CanvasRenderingContext2D
+  ): void {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, r, Math.PI * 2, 0);
+    ctx.fill();
+  }
+}
+
+class Triangle implements DrawBehaviour {
+  draw(
+    x: number,
+    y: number,
+    r: number,
+    color: string,
+    ctx: CanvasRenderingContext2D
+  ): void {
+    const dir = Math.atan2(CANVAS_HEIGHT / 2 - y, CANVAS_WIDTH / 2 - x);
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(
+      x - (4 / 3) * r * Math.cos(dir),
+      y + (4 / 3) * r * Math.sin(dir)
+    );
+    ctx.lineTo(
+      x + r * ((2 / 3) * Math.cos(dir) + Math.sin(dir)),
+      y - r * ((2 / 3) * Math.sin(dir) - Math.cos(dir))
+    );
+    ctx.lineTo(
+      x + r * ((2 / 3) * Math.cos(dir) - Math.sin(dir)),
+      y - r * ((2 / 3) * Math.sin(dir) + Math.cos(dir))
+    );
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
+class Rhombus implements DrawBehaviour {
+  draw(
+    x: number,
+    y: number,
+    r: number,
+    color: string,
+    ctx: CanvasRenderingContext2D
+  ): void {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(x, y + r);
+    ctx.lineTo(x - r, y);
+    ctx.lineTo(x, y - r);
+    ctx.lineTo(x + r, y);
+    ctx.lineTo(x, y + r);
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
+class Movable implements UpdateBehaviour {
+  update(x: number, y: number, velocity: Velocity) {
+    x += velocity.x;
+    y += velocity.y;
+
+    return {
+      x,
+      y,
+      velocity,
+    };
+  }
+}
+
+class Fixed implements UpdateBehaviour {
+  update(x: number, y: number, velocity: Velocity): UpdateOutput {
+    return {
+      x,
+      y,
+      velocity,
+    };
+  }
 }
 
 class Actor {
-  protected drawBehaviour: DrawBegaviour;
-  protected updateBehaviour: UpdateBegaviour;
+  protected drawBehaviour: DrawBehaviour;
+  protected updateBehaviour: UpdateBehaviour;
+
   constructor(
     public x: number,
     public y: number,
     public r: number,
     public color: string,
-    public velocity: Velocity,
+    protected velocity: Velocity,
     protected ctx: CanvasRenderingContext2D
   ) {}
 
@@ -69,90 +158,6 @@ class Actor {
   }
 }
 
-class WithoutMove implements UpdateBegaviour {
-  update(x: number, y: number, velocity: Velocity) {
-    return { x, y, velocity };
-  }
-}
-
-class WithMove implements UpdateBegaviour {
-  update(x: number, y: number, velocity: Velocity) {
-    x += velocity.x;
-    y += velocity.y;
-    return {
-      x,
-      y,
-      velocity,
-    };
-  }
-}
-
-class Circle implements DrawBegaviour {
-  draw(
-    x: number,
-    y: number,
-    r: number,
-    color: string,
-    ctx: CanvasRenderingContext2D
-  ) {
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(x, y, r, Math.PI * 2, 0);
-    ctx.fill();
-  }
-}
-
-class Triangle implements DrawBegaviour {
-  draw(
-    x: number,
-    y: number,
-    r: number,
-    color: string,
-    ctx: CanvasRenderingContext2D
-  ): void {
-    const dir = Math.atan2(y - CANVAS_HEIGHT / 2, x - CANVAS_WIDTH / 2);
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    // Vertice of the triangle
-    ctx.moveTo(
-      x + (4 / 3) * r * Math.cos(dir),
-      y - (4 / 3) * r * Math.sin(dir)
-    );
-    // left catet of the triangle
-    ctx.lineTo(
-      x - r * ((2 / 3) * Math.cos(dir) - Math.sin(dir)),
-      y + r * ((2 / 3) * Math.sin(dir) + Math.cos(dir))
-    );
-    // right side of the triangle
-    ctx.lineTo(
-      x - r * ((2 / 3) * Math.cos(dir) + Math.sin(dir)),
-      y + r * ((2 / 3) * Math.sin(dir) - Math.cos(dir))
-    );
-    ctx.closePath();
-    ctx.fill();
-  }
-}
-
-class Rhombus implements DrawBegaviour {
-  draw(
-    x: number,
-    y: number,
-    r: number,
-    color: string,
-    ctx: CanvasRenderingContext2D
-  ): void {
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.moveTo(x, y + r);
-    ctx.lineTo(x - r, y);
-    ctx.lineTo(x, y - r);
-    ctx.lineTo(x + r, y);
-    ctx.lineTo(x, y + r);
-    ctx.closePath();
-    ctx.fill();
-  }
-}
-
 class Player extends Actor {
   constructor(
     x: number,
@@ -162,8 +167,26 @@ class Player extends Actor {
     ctx: CanvasRenderingContext2D
   ) {
     super(x, y, r, color, { x: 0, y: 0 }, ctx);
-    this.updateBehaviour = new WithoutMove();
     this.drawBehaviour = new Circle();
+    this.updateBehaviour = new Fixed();
+  }
+}
+
+const shapes = [Circle, Rhombus, Triangle];
+class Enemy extends Actor {
+  constructor(
+    x: number,
+    y: number,
+    r: number,
+    color: string,
+    velocity: Velocity,
+    ctx: CanvasRenderingContext2D
+  ) {
+    super(x, y, r, color, velocity, ctx);
+    this.drawBehaviour = new shapes[
+      Math.floor(Math.random() * shapes.length)
+    ]();
+    this.updateBehaviour = new Movable();
   }
 }
 
@@ -177,13 +200,14 @@ class Projectile extends Actor {
     ctx: CanvasRenderingContext2D
   ) {
     super(x, y, r, color, velocity, ctx);
-    this.updateBehaviour = new WithMove();
     this.drawBehaviour = new Circle();
+    this.updateBehaviour = new Movable();
   }
 }
 
 class Particle extends Actor {
   public alpha = 1.0;
+
   constructor(
     x: number,
     y: number,
@@ -193,8 +217,8 @@ class Particle extends Actor {
     ctx: CanvasRenderingContext2D
   ) {
     super(x, y, r, color, velocity, ctx);
-    this.updateBehaviour = new WithMove();
     this.drawBehaviour = new Circle();
+    this.updateBehaviour = new Movable();
   }
 
   draw() {
@@ -209,24 +233,6 @@ class Particle extends Actor {
     this.velocity.y *= FRICTION;
     super.update();
     this.alpha -= 0.01;
-  }
-}
-
-class Enemy extends Actor {
-  constructor(
-    x: number,
-    y: number,
-    r: number,
-    color: string,
-    velocity: Velocity,
-    ctx: CanvasRenderingContext2D
-  ) {
-    super(x, y, r, color, velocity, ctx);
-    const shapes = [Circle, Rhombus, Triangle];
-    this.drawBehaviour = new shapes[
-      Math.floor(Math.random() * shapes.length)
-    ]();
-    this.updateBehaviour = new WithMove();
   }
 }
 
